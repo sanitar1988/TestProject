@@ -39,6 +39,13 @@ namespace ConsoleClient
             salt.CopyTo(sendBytes, 0);
             resultArray.CopyTo(sendBytes, 30);
 
+            s = "\n\n\n";
+            for (int i = 0; i < sendBytes.Length; i++)
+            {
+                s += sendBytes[i];
+            }
+            PrintClass.PrintConsole(s);
+
             return sendBytes;
         }
         public static string Decrypt(byte [] TextToDecrypt)

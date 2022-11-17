@@ -6,11 +6,11 @@
     },
     "ConsoleClient": {
       "commandName": "Project",
-      "workingDirectory": "C:\\Users\\andre\\OneDrive\\Desktop\\TestProject\\ConsoleClient"
+      "workingDirectory": "C:\\C#\\TestProject\\ConsoleClient"
     },
     "ConsoleServer": {
       "commandName": "Project",
-      "workingDirectory": "C:\\Users\\andre\\OneDrive\\Desktop\\TestProject\\ConsoleServer"
+      "workingDirectory": "C:\\C#\\TestProject\\ConsoleServer"
     }
   }
 }
