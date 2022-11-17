@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "ConsoleServer": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\andre\\OneDrive\\Desktop\\TestProject\\ConsoleServer"
+    },
+    "ConsoleClient": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\andre\\OneDrive\\Desktop\\TestProject\\ConsoleClient"
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "profiles": {
+    "WSL": {
+      "commandName": "WSL2",
+      "distributionName": ""
+    },
+    "ConsoleClient": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\andre\\OneDrive\\Desktop\\TestProject\\ConsoleClient"
+    },
+    "ConsoleServer": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\andre\\OneDrive\\Desktop\\TestProject\\ConsoleServer"
+    }
+  }
+}
