@@ -1,11 +1,15 @@
 ﻿using ConsoleClient;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TestProject
 {
     class Program
     {
+        public static Client client = new();
         static void Main()
         {
+            AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
+
             Console.WriteLine("Client start...");
 
             Console.Write("Enter ipaddress or domain server: ");
@@ -14,7 +18,6 @@ namespace TestProject
             Console.Write("Enter port server: ");
             int serverport = Convert.ToInt32(Console.ReadLine());
 
-            Client client = new();
             client.Connection(serveradd, serverport);
 
             client.ListenServerAsync();
@@ -28,6 +31,13 @@ namespace TestProject
 
             Console.Write("Press enter for exit: ");
             Console.ReadLine();
+
+            static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+            {
+                string mess = "asfdf";
+                client.SendMessageAsync(mess);
+            }
+
         }
 
     }

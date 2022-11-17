@@ -8,6 +8,7 @@ namespace TestProject
     public  class Server
     {
         private readonly Socket _server;
+        private Dictionary<EndPoint, Socket> _onlineUsers;
 
         public Server()
         {
@@ -55,7 +56,10 @@ namespace TestProject
                 try
                 {
                     Socket cl = await _server.AcceptAsync();
+                    _onlineUsers.Add(cl.RemoteEndPoint, cl);
+
                     PrintClass.PrintConsole("Client " + cl.RemoteEndPoint + " connected!!!");
+                    PrintClass.PrintConsole("OnlineUsers: " +  _onlineUsers.Count);
 
                     await Task.Factory.StartNew(async () =>
                     {

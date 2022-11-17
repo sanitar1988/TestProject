@@ -29,27 +29,16 @@ namespace TestProject
 
         public async void SendMessageAsync(string message)
         {
-            //await Task.Run(async () =>
-            //{
-            //    Random random = new Random();
-
-            //    while (_client.Connected)
-            //    {
-
-                    try
-                    {
-                        //byte[] buffer = Encoding.UTF8.GetBytes(message);
-                        byte[] buffer = Clear3DES.Encrypt(message);
-                        await _client.SendAsync(buffer, SocketFlags.None);
-                        PrintClass.PrintConsole("Send message done!");
-                    }
-                    catch (Exception ex)
-                    {
-                        PrintClass.PrintConsole(ex.Message);
-                    }
-                    //Task.Delay(random.Next(1000,4000)).Wait();
-            //    }
-            //});
+            try
+            {
+                byte[] buffer = Clear3DES.Encrypt(message);
+                await _client.SendAsync(buffer, SocketFlags.None);
+                PrintClass.PrintConsole("Send message done!");
+            }
+            catch (Exception ex)
+            {
+                PrintClass.PrintConsole(ex.Message);
+            }
         }
 
         public async void ListenServerAsync()
