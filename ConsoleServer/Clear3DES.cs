@@ -15,7 +15,7 @@ namespace ConsoleServer
 
             MD5 md5 = MD5.Create();
             TripleDES des = TripleDES.Create();
-            
+            md5.Clear();   
             var desKey = md5.ComputeHash(new byte[] { salt[24], salt[7], salt[19], salt[8], salt[9] });
 
             string s = "";
