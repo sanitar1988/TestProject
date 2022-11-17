@@ -18,13 +18,6 @@ namespace ConsoleClient
             
             var desKey = md5.ComputeHash(new byte[] { salt[24], salt[7], salt[19], salt[8], salt[9] });
 
-            string s = "";
-            for (int i = 0; i < desKey.Length; i++)
-            {
-                s += desKey[i];
-            }
-            PrintClass.PrintConsole(s);
-
             des.Key = desKey;
             des.KeySize = 128;
             des.IV = new byte[des.BlockSize / 8];
@@ -38,13 +31,6 @@ namespace ConsoleClient
             byte[] sendBytes = new byte[salt.Length + resultArray.Length];
             salt.CopyTo(sendBytes, 0);
             resultArray.CopyTo(sendBytes, 30);
-
-            s = "\n\n\n";
-            for (int i = 0; i < sendBytes.Length; i++)
-            {
-                s += sendBytes[i];
-            }
-            PrintClass.PrintConsole(s);
 
             return sendBytes;
         }
