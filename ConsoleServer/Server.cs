@@ -12,6 +12,8 @@ namespace TestProject
         public Server()
         {
             _server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _server.SendBufferSize = 1024 * 1024;
+            _server.ReceiveBufferSize = 1024 * 1024;
         }
 
         public void StartServerAsync(int serverport)
@@ -62,9 +64,11 @@ namespace TestProject
                             
                             try
                             {
-                                byte[] buffer = new byte[1024];
-                                //var received = await cl.ReceiveAsync(buffer, SocketFlags.None);
-                                await cl.ReceiveAsync(buffer, SocketFlags.None);
+                                byte[] buffer = new byte[1024 * 1024];
+
+                                int received = await cl.ReceiveAsync(buffer, SocketFlags.None);
+                                
+                                //await cl.ReceiveAsync(buffer, SocketFlags.None);
                                 //var response = Encoding.UTF8.GetString(buffer, 0, received);
                                 //await Task.Run(() => {
 
@@ -74,8 +78,9 @@ namespace TestProject
 
                                 //bd job
                                 //Task.Delay(2000).Wait();
-
-                                SendMessageAsync(cl, Clear3DES.Decrypt(buffer.Where(x => x != 0).ToArray()));
+                                byte[] responce = new byte[received];
+                                Array.Copy(buffer,0,responce,0,received);
+                                SendMessageAsync(cl, Clear3DES.Decrypt(responce));
                                 //PrintClass.PrintConsole("Client " + cl.RemoteEndPoint + " say: " + response);
                                 PrintClass.PrintConsole("Client taskID: " + Environment.CurrentManagedThreadId);
                                 PrintClass.PrintConsole("Task count: " + ThreadPool.ThreadCount);
