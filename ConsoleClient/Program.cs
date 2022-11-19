@@ -33,22 +33,20 @@ namespace TestProject
 
             Console.Write("Press enter for exit: ");
             Console.ReadLine();
+        }
+        static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+        {
+            string mess = "Byby";
+            //byte[] b = new byte[mess.Length + 1];
+            //b[0] = (byte)MessageType.EventCommand.UserDisconnected;
 
-            static void CurrentDomain_ProcessExit(object sender, EventArgs e)
-            {
-                string mess = "Byby";
-                byte[] b = new byte[mess.Length + 1];
-                b[0] = (byte)MessageType.EventCommand.UserDisconnected;
+            //byte[] m = Encoding.UTF8.GetBytes(mess);
+            //Array.Copy(b, 1, m, 0, m.Length);
 
-                byte[] m = Encoding.UTF8.GetBytes(mess);
-                Array.Copy(b,1, m,0, m.Length);
-
-                mess = Encoding.UTF8.GetString(b);
-                client.SendMessageAsync(mess);
-                Thread.Sleep(1000);
-                //client.SendMessageAsync(mess);
-            }
-
+            //mess = Encoding.UTF8.GetString(b);
+            //client.SendMessageAsync(mess);
+            Thread.Sleep(1000);
+            //client.SendMessageAsync(mess);
         }
 
     }
