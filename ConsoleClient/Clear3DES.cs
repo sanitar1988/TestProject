@@ -28,6 +28,7 @@ namespace ConsoleClient
             byte[] resultArray = en.TransformFinalBlock(clearBytes, 0, clearBytes.Length);
 
             byte[] sendBytes = new byte[salt.Length + resultArray.Length];
+
             salt.CopyTo(sendBytes, 0);
             resultArray.CopyTo(sendBytes, 30);
 

@@ -1,4 +1,5 @@
 ﻿using ConsoleClient;
+using System.Text;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace TestProject
@@ -8,6 +9,7 @@ namespace TestProject
         public static Client client = new();
         static void Main()
         {
+
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
 
             Console.WriteLine("Client start...");
@@ -26,6 +28,14 @@ namespace TestProject
             {
                 Console.Write("Enter message: ");
                 string mess = Console.ReadLine();
+
+                byte[] b = new byte[mess.Length + 1];
+                b[0] = (byte)MessageType.EventCommand.MessageChatUser;
+
+                byte[] m = Encoding.UTF8.GetBytes(mess);
+                Array.Copy(b,1, m,0, m.Length);
+
+                mess = Encoding.UTF8.GetString(b);
                 client.SendMessageAsync(mess);
             }
 
@@ -34,8 +44,17 @@ namespace TestProject
 
             static void CurrentDomain_ProcessExit(object sender, EventArgs e)
             {
-                string mess = "asfdf";
+                string mess = "Byby";
+                byte[] b = new byte[mess.Length + 1];
+                b[0] = (byte)MessageType.EventCommand.UserDisconnected;
+
+                byte[] m = Encoding.UTF8.GetBytes(mess);
+                Array.Copy(b,1, m,0, m.Length);
+
+                mess = Encoding.UTF8.GetString(b);
                 client.SendMessageAsync(mess);
+                Thread.Sleep(1000);
+                //client.SendMessageAsync(mess);
             }
 
         }
