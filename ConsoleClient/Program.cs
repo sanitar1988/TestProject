@@ -12,32 +12,24 @@ namespace TestProject
 
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
 
-            Console.WriteLine("Client start...");
+            //Console.WriteLine("Client start...");
 
-            Console.Write("Enter ipaddress or domain server: ");
-            string serveradd = Console.ReadLine();
+            //Console.Write("Enter ipaddress or domain server: ");
+            //string serveradd = Console.ReadLine();
 
-            Console.Write("Enter port server: ");
-            int serverport = Convert.ToInt32(Console.ReadLine());
+            //Console.Write("Enter port server: ");
+            //int serverport = Convert.ToInt32(Console.ReadLine());
 
-            client.Connection(serveradd, serverport);
+            //client.Connection(serveradd, serverport);
 
-            client.ListenServerAsync();
+            //client.ListenServerAsync();
 
-            for (int i = 0; i < 1000; i++)
-            {
-                Console.Write("Enter message: ");
-                string mess = Console.ReadLine();
-
-                byte[] b = new byte[mess.Length + 1];
-                b[0] = (byte)MessageType.EventCommand.MessageChatUser;
-
-                byte[] m = Encoding.UTF8.GetBytes(mess);
-                Array.Copy(b,1, m,0, m.Length);
-
-                mess = Encoding.UTF8.GetString(b);
-                client.SendMessageAsync(mess);
-            }
+            //for (int i = 0; i < 1000; i++)
+            //{
+            //    Console.Write("Enter message: ");
+            //    string mess = Console.ReadLine();
+            //    client.SendMessageAsync(mess);
+            //}
 
             Console.Write("Press enter for exit: ");
             Console.ReadLine();
