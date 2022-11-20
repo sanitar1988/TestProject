@@ -37,7 +37,7 @@ namespace TestProject
             message.MessageType = (byte)MessageType.Type.UserAuthorization;
             message.MessageData = DataSerialize.Serialize(userFirstInfo);
 
-            byte[] encryptmess = Clear3DES.Encrypt(message.MessageData);
+            byte[] encryptmess = Clear3DES.Encrypt(message.MessageGetBytes());
 
             client.SendMessageAsync(encryptmess);
 

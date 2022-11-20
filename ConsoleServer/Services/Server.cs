@@ -38,9 +38,9 @@ namespace ConsoleServer.Services
         {
             try
             {
-                Message inmess = (Message)DataSerialize.Deserialize(ByteMessage);
-                byte[] decryptmess = Clear3DES.Decrypt(inmess.MessageData);
-
+                byte[] decryptmess = Clear3DES.Decrypt(ByteMessage);
+                Message inmess = (Message)DataSerialize.Deserialize(decryptmess);
+              
                 switch (inmess.MessageType)
                 {
                     case (byte)MessageType.Type.UserAuthorization:

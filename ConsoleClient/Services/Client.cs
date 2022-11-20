@@ -39,10 +39,10 @@ namespace ConsoleClient.Services
         {
             try
             {
-                Message mess = (Message)DataSerialize.Deserialize(ByteMessage);
-                byte[] decryptmess = Clear3DES.Decrypt(mess.MessageData);
+                byte[] decryptmess = Clear3DES.Decrypt(ByteMessage);
+                Message inmess = (Message)DataSerialize.Deserialize(decryptmess);
 
-                switch (mess.MessageType)
+                switch (inmess.MessageType)
                 {
                     case (byte)MessageType.Type.UserMessage:
                         PrintClass.PrintConsole("From server : " + Encoding.UTF8.GetString(decryptmess));
