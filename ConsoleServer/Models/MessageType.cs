@@ -30,12 +30,12 @@ namespace ConsoleClient.Models
             /// <summary>
             /// Личное Сообщение КЛИЕНТУ
             /// </summary>
-            MessageChatUser,
+            UserMessage,
 
             /// <summary>
             /// Личное Сообщение ГРУППЕ
             /// </summary>
-            MessageChatGroup,
+            GroupMessage,
 
             /// <summary>
             /// Личное Сообщение РАЙОНУ

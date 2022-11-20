@@ -5,6 +5,7 @@ using System.IO;
 using System.Text;
 using ConsoleClient.Services;
 using TestProject;
+using ConsoleClient.Models;
 
 namespace ConsoleClient.Services
 {
@@ -34,17 +35,19 @@ namespace ConsoleClient.Services
         }
 
 
-        public void AnalyzingData(byte[] Message)
+        public void AnalyzingData(byte[] ByteMessage)
         {
             try
             {
-                //Message message = new();
-                //Message newmessage = message.Deserialize(Message);
+                Message mess = (Message)DataSerialize.Deserialize(ByteMessage);
+                byte[] decryptmess = Clear3DES.Decrypt(mess.MessageData);
 
-                //if (Encrypt) await SomeClient.SendAsync(Clear3DES.Encrypt(Message), SocketFlags.None);
-                //else await SomeClient.SendAsync(Message, SocketFlags.None);
-
-                //PrintClass.PrintConsole("Send message done!");
+                switch (mess.MessageType)
+                {
+                    case (byte)MessageType.Type.UserMessage:
+                        PrintClass.PrintConsole("From server : " + Encoding.UTF8.GetString(decryptmess));
+                    break;
+                }
             }
             catch (Exception ex)
             {
@@ -52,11 +55,11 @@ namespace ConsoleClient.Services
             }
         }
 
-        public async void SendMessageAsync(byte[] Message)
+        public async void SendMessageAsync(byte[] ByteMessage)
         {
             try
             {
-                await _client.SendAsync(Message, SocketFlags.None);
+                await _client.SendAsync(ByteMessage, SocketFlags.None);
                 PrintClass.PrintConsole("Send message done!");
             }
             catch (Exception ex)
@@ -65,7 +68,7 @@ namespace ConsoleClient.Services
             }
         }
 
-        public async void ListenServerAsync(bool Encrypt)
+        public async void ListenServerAsync()
         {
             await Task.Run(async () =>
             {
@@ -79,6 +82,9 @@ namespace ConsoleClient.Services
                         byte[] responce = new byte[received];
                         Array.Copy(buffer, 0, responce, 0, received);
                         AnalyzingData(responce);
+
+                        //PrintClass.PrintConsole("Client taskID: " + Environment.CurrentManagedThreadId);
+                        //PrintClass.PrintConsole("Task count: " + ThreadPool.ThreadCount);
                     }
                     catch (Exception ex)
                     {

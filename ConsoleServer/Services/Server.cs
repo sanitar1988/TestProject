@@ -1,5 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
+using System.Text;
+using ConsoleClient.Models;
 using ConsoleServer.Models;
 
 namespace ConsoleServer.Services
@@ -32,17 +34,28 @@ namespace ConsoleServer.Services
         }
 
 
-        public void AnalyzingData(Socket SomeClient, byte[] Message)
+        public void AnalyzingData(Socket SomeClient, byte[] ByteMessage)
         {
             try
             {
-                //Message message = new();
-                //Message newmessage = message.Deserialize(Message);
+                Message inmess = (Message)DataSerialize.Deserialize(ByteMessage);
+                byte[] decryptmess = Clear3DES.Decrypt(inmess.MessageData);
 
-                //if (Encrypt) await SomeClient.SendAsync(Clear3DES.Encrypt(Message), SocketFlags.None);
-                //else await SomeClient.SendAsync(Message, SocketFlags.None);
+                switch (inmess.MessageType)
+                {
+                    case (byte)MessageType.Type.UserAuthorization:
 
-                //PrintClass.PrintConsole("Send message done!");
+                        Message outmess = new Message();
+                        outmess.MessageType = (byte)MessageType.Type.UserMessage;
+                        outmess.MessageData = DataSerialize.Serialize("Hello user! WellCUM in server");
+                        byte[] outencryptmess = Clear3DES.Encrypt(outmess.MessageData);
+                        SendMessageAsync(SomeClient, outencryptmess);
+                    break;
+
+                    case (byte)MessageType.Type.UserDisconnected:
+                        UserDisconnected(SomeClient);
+                    break;
+                }
             }
             catch (Exception ex)
             {
@@ -50,11 +63,25 @@ namespace ConsoleServer.Services
             }
         }
 
-        public async void SendMessageAsync(Socket SomeClient, byte[] Message)
+        private void UserDisconnected(Socket SomeClient)
+        {
+            PrintClass.PrintConsole("Client " + SomeClient.RemoteEndPoint + " disconnected!!!");
+            _onlineUsers.Remove(SomeClient.RemoteEndPoint);
+            PrintClass.PrintConsole("OnlineUsers: " + _onlineUsers.Count);
+        }
+
+        private void UserConnected(Socket SomeClient)
+        {
+            PrintClass.PrintConsole("Client " + SomeClient.RemoteEndPoint + " connected!!!");
+            _onlineUsers.Add(SomeClient.RemoteEndPoint, SomeClient);
+            PrintClass.PrintConsole("OnlineUsers: " + _onlineUsers.Count);
+        }
+
+        public async void SendMessageAsync(Socket SomeClient, byte[] ByteMessage)
         {
             try
             {
-                await SomeClient.SendAsync(Message, SocketFlags.None);
+                await SomeClient.SendAsync(ByteMessage, SocketFlags.None);
                 PrintClass.PrintConsole("Send message done!");
             }
             catch (Exception ex)
@@ -72,10 +99,7 @@ namespace ConsoleServer.Services
                 try
                 {
                     Socket cl = await _server.AcceptAsync();
-                    _onlineUsers.Add(cl.RemoteEndPoint, cl);
-
-                    PrintClass.PrintConsole("Client " + cl.RemoteEndPoint + " connected!!!");
-                    PrintClass.PrintConsole("OnlineUsers: " + _onlineUsers.Count);
+                    UserConnected(cl);
 
                     await Task.Factory.StartNew(async () =>
                     {

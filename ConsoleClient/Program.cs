@@ -21,7 +21,7 @@ namespace TestProject
 
             client.Connection(serveradd, serverport);
 
-            client.ListenServerAsync(true);
+            client.ListenServerAsync();
 
             Console.WriteLine("User registarion: ");
 
@@ -37,7 +37,9 @@ namespace TestProject
             message.MessageType = (byte)MessageType.Type.UserAuthorization;
             message.MessageData = DataSerialize.Serialize(userFirstInfo);
 
-            client.SendMessageAsync(message.MessageGetBytes());
+            byte[] encryptmess = Clear3DES.Encrypt(message.MessageData);
+
+            client.SendMessageAsync(encryptmess);
 
             Console.Write("Press enter for exit: ");
             Console.ReadLine();
@@ -47,7 +49,9 @@ namespace TestProject
             Message message = new Message();
             message.MessageType = (byte)MessageType.Type.UserDisconnected;
             message.MessageData = DataSerialize.Serialize("Byby");
-            client.SendMessageAsync(message.MessageGetBytes());
+
+            byte[] encryptmess = Clear3DES.Encrypt(message.MessageData);
+            client.SendMessageAsync(encryptmess);
         }
 
     }
