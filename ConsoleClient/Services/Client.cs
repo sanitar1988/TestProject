@@ -1,12 +1,7 @@
-﻿using System.Net.Sockets;
-using System.Net;
-using ConsoleClient;
-using System.IO;
+﻿using System.Net;
+using System.Net.Sockets;
 using System.Text;
-using ConsoleClient.Services;
-using TestProject;
 using ConsoleClient.Models;
-using System.Text.Json;
 
 namespace ConsoleClient.Services
 {
@@ -39,7 +34,7 @@ namespace ConsoleClient.Services
             try
             {
                 byte[] decryptmess = Clear3DES.Decrypt(ByteMessage);
-                Message inmess = JsonSerializer.Deserialize<Message>(decryptmess);
+                Message inmess = (Message)DataSerialize.Deserialize(decryptmess);
 
                 switch (inmess.MessageType)
                 {

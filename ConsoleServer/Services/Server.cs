@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using ConsoleClient.Models;
 using ConsoleServer.Models;
 
 namespace ConsoleServer.Services
@@ -38,25 +37,24 @@ namespace ConsoleServer.Services
             try
             {
                 byte[] decryptmess = Clear3DES.Decrypt(ByteMessage);
-                PrintClass.PrintConsole(Encoding.UTF8.GetString(decryptmess));
+                Message inmess = (Message)DataSerialize.Deserialize(decryptmess);
 
-                //Message inmess = (Message)DataSerialize.Deserialize(decryptmess);
+                switch (inmess.MessageType)
+                {
+                    case (byte)MessageType.Type.UserAuthorization:
 
-                //switch (inmess.MessageType)
-                //{
-                //    case (byte)MessageType.Type.UserAuthorization:
+                        Message mess = new Message();
+                        mess.MessageType = (byte)MessageType.Type.UserMessage;
+                        mess.MessageData = DataSerialize.Serialize("Hello user! WellCUM in server");
 
-                //        Message outmess = new Message();
-                //        outmess.MessageType = (byte)MessageType.Type.UserMessage;
-                //        outmess.MessageData = DataSerialize.Serialize("Hello user! WellCUM in server");
-                //        byte[] outencryptmess = Clear3DES.Encrypt(outmess.MessageData);
-                //        SendMessageAsync(SomeClient, outencryptmess);
-                //    break;
+                        byte[] encryptmess = Clear3DES.Encrypt(DataSerialize.Serialize(mess));
+                        SendMessageAsync(SomeClient, encryptmess);
+                        break;
 
-                //    case (byte)MessageType.Type.UserDisconnected:
-                //        UserDisconnected(SomeClient);
-                //    break;
-                //}
+                    case (byte)MessageType.Type.UserDisconnected:
+                        UserDisconnected(SomeClient);
+                        break;
+                }
             }
             catch (Exception ex)
             {

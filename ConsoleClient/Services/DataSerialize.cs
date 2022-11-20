@@ -4,19 +4,25 @@ namespace ConsoleClient.Services
 {
     public class DataSerialize
     {
-        public static byte[] Serialize(object Object)
+        [Obsolete]
+        public static byte[]? Serialize(Object obj)
         {
-            BinaryFormatter formatter = new BinaryFormatter();
+            if (obj == null) return null;
+            BinaryFormatter bf = new();
             MemoryStream ms = new();
-            formatter.Serialize(ms, Object);
+            bf.Serialize(ms, obj);
             return ms.ToArray();
         }
 
-        public static object Deserialize(byte[] Data)
+        [Obsolete]
+        public static Object Deserialize(byte[] arrBytes)
         {
-            BinaryFormatter formatter = new BinaryFormatter();
-            MemoryStream ms = new(Data);
-            return formatter.Deserialize(ms);
+            MemoryStream memStream = new();
+            BinaryFormatter binForm = new();
+            memStream.Write(arrBytes, 0, arrBytes.Length);
+            memStream.Seek(0, SeekOrigin.Begin);
+            Object obj = (Object)binForm.Deserialize(memStream);
+            return obj;
         }
     }
 }

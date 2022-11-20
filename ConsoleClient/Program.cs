@@ -47,6 +47,10 @@ namespace TestProject
 
             byte[] encryptmess = Clear3DES.Encrypt(DataSerialize.Serialize(message));
 
+
+            //byte[] decryptmess = Clear3DES.Decrypt(encryptmess);
+            //Message inmess = (Message)DataSerialize.Deserialize(decryptmess);
+
             client.SendMessageAsync(encryptmess);
 
             Console.Write("Press enter for exit: ");
@@ -57,6 +61,8 @@ namespace TestProject
             Message message = new Message();
             message.MessageType = (byte)MessageType.Type.UserDisconnected;
             message.MessageData = "Byby";
+
+            PrintClass.PrintConsole("AAAAAAAAAAAAAAAA");
 
             byte[] encryptmess = Clear3DES.Encrypt(DataSerialize.Serialize(message));
             client.SendMessageAsync(encryptmess);

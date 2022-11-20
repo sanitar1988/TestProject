@@ -1,7 +1,4 @@
-﻿using ConsoleClient;
-using ConsoleClient.Services;
-
-namespace ConsoleClient.Services
+﻿namespace ConsoleClient.Services
 {
     public class PrintClass
     {
