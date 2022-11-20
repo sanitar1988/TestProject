@@ -6,10 +6,11 @@ using System.Threading.Tasks;
 
 namespace ConsoleClient.Models
 {
+    [Serializable]
     public class UserFirstInfo
     { 
         public string Username { get; set; }
-        public string Password { get; set; }
-        public string Email { get; set; }
+        public string Userpassword { get; set; }
+        public string Useremail { get; set; }
     }
 }

@@ -6,6 +6,7 @@ using System.Text;
 using ConsoleClient.Services;
 using TestProject;
 using ConsoleClient.Models;
+using System.Text.Json;
 
 namespace ConsoleClient.Services
 {
@@ -19,13 +20,12 @@ namespace ConsoleClient.Services
             _client.SendBufferSize = 1024 * 1024;
             _client.ReceiveBufferSize = 1024 * 1024;
         }
-
-        public void Connection(string serveradd, int serverport)
+        public void Connection(string Serveraddress, int Serverport)
         {
             try
             {
-                _endPoint = new IPEndPoint(IPAddress.Parse(serveradd), serverport);
-                _client.Connect(serveradd, serverport);
+                _endPoint = new IPEndPoint(IPAddress.Parse(Serveraddress), Serverport);
+                _client.Connect(Serveraddress, Serverport);
                 PrintClass.PrintConsole("Connection done!");
             }
             catch (Exception ex)
@@ -34,13 +34,12 @@ namespace ConsoleClient.Services
             }
         }
 
-
         public void AnalyzingData(byte[] ByteMessage)
         {
             try
             {
                 byte[] decryptmess = Clear3DES.Decrypt(ByteMessage);
-                Message inmess = (Message)DataSerialize.Deserialize(decryptmess);
+                Message inmess = JsonSerializer.Deserialize<Message>(decryptmess);
 
                 switch (inmess.MessageType)
                 {

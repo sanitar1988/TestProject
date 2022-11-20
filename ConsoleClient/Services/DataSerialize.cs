@@ -1,19 +1,22 @@
-﻿
-using System.Text;
-using System.Text.Json;
+﻿using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ConsoleClient.Services
 {
     public class DataSerialize
     {
-        public static byte[] Serialize(object Data)
+        public static byte[] Serialize(object Object)
         {
-            return Encoding.UTF8.GetBytes(JsonSerializer.Serialize(Data));
+            BinaryFormatter formatter = new BinaryFormatter();
+            MemoryStream ms = new();
+            formatter.Serialize(ms, Object);
+            return ms.ToArray();
         }
 
         public static object Deserialize(byte[] Data)
         {
-            return JsonSerializer.Deserialize(Data, typeof(object));
+            BinaryFormatter formatter = new BinaryFormatter();
+            MemoryStream ms = new(Data);
+            return formatter.Deserialize(ms);
         }
     }
 }

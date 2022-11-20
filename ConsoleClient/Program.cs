@@ -1,5 +1,10 @@
 ﻿using ConsoleClient.Models;
 using ConsoleClient.Services;
+using System.Net.Http.Json;
+using System.Runtime.Serialization.Json;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace TestProject
 {
@@ -27,17 +32,20 @@ namespace TestProject
 
             UserFirstInfo userFirstInfo = new();
             Console.WriteLine("Enter user name: ");
-            userFirstInfo.Username = Console.ReadLine();
+            //userFirstInfo.Username = Console.ReadLine();
+            userFirstInfo.Username = "Andrey";
             Console.WriteLine("Enter user password: ");
-            userFirstInfo.Password = Console.ReadLine();
+            //userFirstInfo.Password = Console.ReadLine();
+            userFirstInfo.Userpassword = "12345";
             Console.WriteLine("Enter user email: ");
-            userFirstInfo.Email = Console.ReadLine();
+            //userFirstInfo.Email = Console.ReadLine();
+            userFirstInfo.Useremail = "andrey.kuznetzov@yandex.ru";
 
             Message message = new();
             message.MessageType = (byte)MessageType.Type.UserAuthorization;
-            message.MessageData = DataSerialize.Serialize(userFirstInfo);
+            message.MessageData = userFirstInfo;
 
-            byte[] encryptmess = Clear3DES.Encrypt(message.MessageGetBytes());
+            byte[] encryptmess = Clear3DES.Encrypt(DataSerialize.Serialize(message));
 
             client.SendMessageAsync(encryptmess);
 
@@ -48,9 +56,9 @@ namespace TestProject
         {
             Message message = new Message();
             message.MessageType = (byte)MessageType.Type.UserDisconnected;
-            message.MessageData = DataSerialize.Serialize("Byby");
+            message.MessageData = "Byby";
 
-            byte[] encryptmess = Clear3DES.Encrypt(message.MessageData);
+            byte[] encryptmess = Clear3DES.Encrypt(DataSerialize.Serialize(message));
             client.SendMessageAsync(encryptmess);
         }
 
