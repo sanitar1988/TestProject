@@ -1,17 +1,15 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace ConsoleServer
+namespace ConsoleServer.Services
 {
-    public  class Clear3DES
+    public class Clear3DES
     {
-        public static byte[] Encrypt(string TextToEncrypt)
+        public static byte[] Encrypt(byte[] DataToEncrypt)
         {
             RandomNumberGenerator rNG = RandomNumberGenerator.Create();
             byte[] salt = new byte[30];
             rNG.GetBytes(salt, 0, salt.Length);
-
-            byte[] clearBytes = Encoding.UTF8.GetBytes(TextToEncrypt);
 
             MD5 md5 = MD5.Create();
             var desKey = md5.ComputeHash(new byte[] { salt[24], salt[7], salt[19], salt[8], salt[9] });
@@ -25,18 +23,19 @@ namespace ConsoleServer
             des.Mode = CipherMode.ECB;
 
             ICryptoTransform en = des.CreateEncryptor();
-            byte[] resultArray = en.TransformFinalBlock(clearBytes, 0, clearBytes.Length);
+            byte[] resultArray = en.TransformFinalBlock(DataToEncrypt, 0, DataToEncrypt.Length);
 
             byte[] sendBytes = new byte[salt.Length + resultArray.Length];
+
             salt.CopyTo(sendBytes, 0);
             resultArray.CopyTo(sendBytes, 30);
 
             return sendBytes;
         }
-        public static string Decrypt(byte[] TextToDecrypt)
+        public static byte[] Decrypt(byte[] DataToDecrypt)
         {
             MD5 md5 = MD5.Create();
-            var desKey = md5.ComputeHash(new byte[] { TextToDecrypt[24], TextToDecrypt[7], TextToDecrypt[19], TextToDecrypt[8], TextToDecrypt[9] });
+            var desKey = md5.ComputeHash(new byte[] { DataToDecrypt[24], DataToDecrypt[7], DataToDecrypt[19], DataToDecrypt[8], DataToDecrypt[9] });
             md5.Clear();
 
             TripleDES des = TripleDES.Create();
@@ -46,15 +45,15 @@ namespace ConsoleServer
             des.Padding = PaddingMode.PKCS7;
             des.Mode = CipherMode.ECB;
 
-            byte[] resultArray = new byte[TextToDecrypt.Length - 30];
+            byte[] resultArray = new byte[DataToDecrypt.Length - 30];
 
-            Array.Copy(TextToDecrypt, 30, resultArray, 0, resultArray.Length);
+            Array.Copy(DataToDecrypt, 30, resultArray, 0, resultArray.Length);
 
             ICryptoTransform de = des.CreateDecryptor();
 
-            byte[] DEresultArray = de.TransformFinalBlock(resultArray, 0, resultArray.Length);
+            byte[] sendBytes = de.TransformFinalBlock(resultArray, 0, resultArray.Length);
 
-            return Encoding.UTF8.GetString(DEresultArray, 0, DEresultArray.Length);
+            return sendBytes;
         }
     }
 }

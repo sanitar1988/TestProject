@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ConsoleClient;
+using ConsoleClient.Models;
 
-namespace ConsoleClient
+namespace ConsoleClient.Models
 {
     public class MessageType
     {
-        public enum EventCommand : byte
+        public enum Type : byte
         {
             /// <summary>
             /// Нет команды
@@ -16,9 +18,14 @@ namespace ConsoleClient
             none = 0,
 
             /// <summary>
-            /// Сообщение в общий чат
+            /// Сообщение о регистрации
             /// </summary>
-            RegInfoUser,
+            UserRegistration,
+
+            /// <summary>
+            /// Сообщение о авторизации
+            /// </summary>
+            UserAuthorization,
 
             /// <summary>
             /// Личное Сообщение КЛИЕНТУ

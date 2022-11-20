@@ -1,6 +1,9 @@
-﻿namespace ConsoleServer
+﻿using ConsoleClient;
+using ConsoleClient.Services;
+
+namespace ConsoleClient.Services
 {
-    public  class PrintClass
+    public class PrintClass
     {
         public static void PrintConsole(string data)
         {

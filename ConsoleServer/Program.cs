@@ -1,4 +1,6 @@
 ﻿
+using ConsoleServer.Services;
+
 namespace TestProject
 {
     class Program
