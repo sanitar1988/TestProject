@@ -9,7 +9,6 @@ namespace ConsoleServer.Models
         public MessageType.Type MessageType = 0;
         public int CountRows = 0;
 
-
         private byte[] MessageDataBytes = new byte[1];
         private string[] MessageDataStrings = new string[1];
         private List<byte[]> BytesListData = new List<byte[]>();
@@ -22,6 +21,7 @@ namespace ConsoleServer.Models
         {
             BytesListData.Add(Encoding.UTF8.GetBytes(data));
         }
+
 
         public byte[] ConvertToBytes()
         {
@@ -57,7 +57,6 @@ namespace ConsoleServer.Models
 
             return MessageDataBytes;
         }
-
         public string[] ConvertToString(byte[] data)
         {
             MessageType = (MessageType.Type)data[0];
