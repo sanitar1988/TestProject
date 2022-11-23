@@ -5,22 +5,22 @@ using ConsoleClient.Models;
 
 namespace ConsoleClient.Services
 {
-    public class Client
+    public class SocketClient
     {
-        private readonly Socket _client;
-        private IPEndPoint _endPoint;
-        public Client()
+        private readonly Socket Client;
+        private IPEndPoint EndPoint;
+        public SocketClient()
         {
-            _client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            _client.SendBufferSize = 1024 * 1024;
-            _client.ReceiveBufferSize = 1024 * 1024;
+            Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            Client.SendBufferSize = 1024 * 1024;
+            Client.ReceiveBufferSize = 1024 * 1024;
         }
-        public void Connection(string Serveraddress, int Serverport)
+        public void Connection(string serverAddress, int serverPort)
         {
             try
             {
-                _endPoint = new IPEndPoint(IPAddress.Parse(Serveraddress), Serverport);
-                _client.Connect(Serveraddress, Serverport);
+                EndPoint = new IPEndPoint(IPAddress.Parse(serverAddress), serverPort);
+                Client.Connect(serverAddress, serverPort);
                 PrintClass.PrintConsole("Connection done!");
             }
             catch (Exception ex)
@@ -28,19 +28,19 @@ namespace ConsoleClient.Services
                 PrintClass.PrintConsole(ex.Message);
             }
         }
-
-        public void AnalyzingData(byte[] ByteMessage)
+        public void AnalyzingData(byte[] byteMessage)
         {
             try
             {
-                byte[] decryptmess = Clear3DES.Decrypt(ByteMessage);
-                Message inmess = (Message)DataSerialize.Deserialize(decryptmess);
+                byte[] Decryptmess = Clear3DES.Decrypt(byteMessage);
+                Message IncomingMessage = new Message(MessageType.Type.none);
+                string[] ArrayString = IncomingMessage.ConvertToString(Decryptmess);
 
-                switch (inmess.MessageType)
+                switch (IncomingMessage.MessageType)
                 {
-                    case (byte)MessageType.Type.UserMessage:
-                        PrintClass.PrintConsole("From server : " + Encoding.UTF8.GetString(decryptmess));
-                    break;
+                    case MessageType.Type.UserMessage:
+                        PrintClass.PrintConsole("From server : " + ArrayString[0]);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -48,12 +48,11 @@ namespace ConsoleClient.Services
                 PrintClass.PrintConsole(ex.Message);
             }
         }
-
-        public async void SendMessageAsync(byte[] ByteMessage)
+        public async void SendMessageAsync(byte[] byteMessage)
         {
             try
             {
-                await _client.SendAsync(ByteMessage, SocketFlags.None);
+                await Client.SendAsync(byteMessage, SocketFlags.None);
                 PrintClass.PrintConsole("Send message done!");
             }
             catch (Exception ex)
@@ -61,21 +60,20 @@ namespace ConsoleClient.Services
                 PrintClass.PrintConsole(ex.Message);
             }
         }
-
         public async void ListenServerAsync()
         {
             await Task.Run(async () =>
             {
-                while (_client.Connected)
+                while (Client.Connected)
                 {
                     try
                     {
-                        byte[] buffer = new byte[_client.ReceiveBufferSize];
-                        int received = await _client.ReceiveAsync(buffer, SocketFlags.None);
+                        byte[] Buffer = new byte[Client.ReceiveBufferSize];
+                        int Received = await Client.ReceiveAsync(Buffer, SocketFlags.None);
 
-                        byte[] responce = new byte[received];
-                        Array.Copy(buffer, 0, responce, 0, received);
-                        AnalyzingData(responce);
+                        byte[] Responce = new byte[Received];
+                        Array.Copy(Buffer, 0, Responce, 0, Received);
+                        AnalyzingData(Responce);
 
                         //PrintClass.PrintConsole("Client taskID: " + Environment.CurrentManagedThreadId);
                         //PrintClass.PrintConsole("Task count: " + ThreadPool.ThreadCount);

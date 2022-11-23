@@ -12,7 +12,7 @@ namespace TestProject
             Console.Write("Enter port server: ");
             int serverport = Convert.ToInt32(Console.ReadLine());
 
-            Server server = new();
+            SocketServer server = new();
             server.StartServerAsync(serverport);
             server.ListenAsync();
 

@@ -10,7 +10,7 @@ namespace TestProject
 {
     class Program
     {
-        public static Client client = new();
+        public static SocketClient client = new();
 
         static void Main()
         {
@@ -33,23 +33,20 @@ namespace TestProject
             UserFirstInfo userFirstInfo = new();
             Console.WriteLine("Enter user name: ");
             //userFirstInfo.Username = Console.ReadLine();
-            userFirstInfo.Username = "Andrey";
+            userFirstInfo.UserName = "Andrey";
             Console.WriteLine("Enter user password: ");
             //userFirstInfo.Password = Console.ReadLine();
-            userFirstInfo.Userpassword = "12345";
+            userFirstInfo.UserPassword = "12345";
             Console.WriteLine("Enter user email: ");
             //userFirstInfo.Email = Console.ReadLine();
-            userFirstInfo.Useremail = "andrey.kuznetzov@yandex.ru";
+            userFirstInfo.UserEmail = "andrey.kuznetzov@yandex.ru";
 
-            Message message = new();
-            message.MessageType = (byte)MessageType.Type.UserAuthorization;
-            message.MessageData = userFirstInfo;
+            Message message = new(MessageType.Type.UserAuthorization);
+            message.SetData(userFirstInfo.UserName);
+            message.SetData(userFirstInfo.UserPassword);
+            message.SetData(userFirstInfo.UserEmail);
 
-            byte[] encryptmess = Clear3DES.Encrypt(DataSerialize.Serialize(message));
-
-
-            //byte[] decryptmess = Clear3DES.Decrypt(encryptmess);
-            //Message inmess = (Message)DataSerialize.Deserialize(decryptmess);
+            byte[] encryptmess = Clear3DES.Encrypt(message.ConvertToBytes());
 
             client.SendMessageAsync(encryptmess);
 
@@ -58,13 +55,10 @@ namespace TestProject
         }
         static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
-            Message message = new Message();
-            message.MessageType = (byte)MessageType.Type.UserDisconnected;
-            message.MessageData = "Byby";
+            Message message = new Message(MessageType.Type.UserDisconnected);
+            message.SetData("Byby");
 
-            PrintClass.PrintConsole("AAAAAAAAAAAAAAAA");
-
-            byte[] encryptmess = Clear3DES.Encrypt(DataSerialize.Serialize(message));
+            byte[] encryptmess = Clear3DES.Encrypt(message.ConvertToBytes());
             client.SendMessageAsync(encryptmess);
         }
 
