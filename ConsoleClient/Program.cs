@@ -1,10 +1,11 @@
 ﻿using ConsoleClient.Models;
 using ConsoleClient.Services;
+using System.IO;
 using System.Net.Http.Json;
-using System.Runtime.Serialization.Json;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
+using System.Xml.Linq;
 
 namespace TestProject
 {
@@ -12,55 +13,92 @@ namespace TestProject
     {
         public static SocketClient client = new();
 
-        static void Main()
+        static async Task Main()
         {
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(CurrentDomain_ProcessExit);
 
             Console.WriteLine("Client start...");
 
-            Console.Write("Enter ipaddress or domain server: ");
-            string serveradd = Console.ReadLine();
+            //Console.Write("Enter ipaddress or domain server: ");
+            //string serveradd = Console.ReadLine();
+            string ServerAddress = "192.168.1.65";
 
-            Console.Write("Enter port server: ");
-            int serverport = Convert.ToInt32(Console.ReadLine());
+            //Console.Write("Enter port server: ");
+            //int serverport = Convert.ToInt32(Console.ReadLine());
+            int ServerPort = 5555;
 
-            client.Connection(serveradd, serverport);
-
-            client.ListenServerAsync();
-
-            Console.WriteLine("User registarion: ");
-
-            UserFirstInfo userFirstInfo = new();
-            Console.WriteLine("Enter user name: ");
-            //userFirstInfo.Username = Console.ReadLine();
-            userFirstInfo.UserName = "Andrey";
-            Console.WriteLine("Enter user password: ");
-            //userFirstInfo.Password = Console.ReadLine();
-            userFirstInfo.UserPassword = "12345";
-            Console.WriteLine("Enter user email: ");
-            //userFirstInfo.Email = Console.ReadLine();
-            userFirstInfo.UserEmail = "andrey.kuznetzov@yandex.ru";
-
-            Message message = new(MessageType.Type.UserAuthorization);
-            message.SetData(userFirstInfo.UserName);
-            message.SetData(userFirstInfo.UserPassword);
-            message.SetData(userFirstInfo.UserEmail);
-
-            byte[] encryptmess = Clear3DES.Encrypt(message.ConvertToBytes());
-
-            client.SendMessageAsync(encryptmess);
-
-            Console.Write("Press enter for exit: ");
+            Console.Write("Please press Enter to connect");
             Console.ReadLine();
+
+            client.ConnectionAsync(ServerAddress, ServerPort);
+            client.RunSocketClientAsync();
+
+
+            OutgoingMessage OMMessage = new();
+            OMMessage.SetType(MessageType.Type.UserConnected);
+            OMMessage.SetData("I em connect");
+            byte[] encryptMessage = Clear3DES.Encrypt(OMMessage.GetDataBytes());
+
+            client.SendDataAsync(encryptMessage);
+
+            await Task.Run(() => { while (true) { Task.Delay(1).Wait(); }; });
         }
-        static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+        public static void Registation()
         {
-            Message message = new Message(MessageType.Type.UserDisconnected);
-            message.SetData("Byby");
 
-            byte[] encryptmess = Clear3DES.Encrypt(message.ConvertToBytes());
-            client.SendMessageAsync(encryptmess);
+            Console.Write("Please say your name: ");
+            string Name = Console.ReadLine();
+
+            OutgoingMessage OMMessage = new();
+            OMMessage.SetType(MessageType.Type.UserRegistration);
+            OMMessage.SetData(Name);
+            byte[] encryptMessage = Clear3DES.Encrypt(OMMessage.GetDataBytes());
+
+            client.SendDataAsync(encryptMessage);
         }
 
+        public static void SendMessages()
+        {
+            Console.Write("I em say: ");
+            string Say = Console.ReadLine();
+
+            OutgoingMessage OMMessage = new();
+            OMMessage.SetType(MessageType.Type.UserMessage);
+            OMMessage.SetData(Say);
+            byte[] encryptMessage = Clear3DES.Encrypt(OMMessage.GetDataBytes());
+
+            client.SendDataAsync(encryptMessage);
+
+            //for (int i = 0; i < 1000; i++)
+            //{
+                
+            //}
+        }
+
+        private static async Task<byte[]> ReadBytesFile(string FileName)
+        {
+            byte[] Buffer = new byte[1];
+            string FilePath = Directory.GetCurrentDirectory() + FileName;
+            using (FileStream FileStream = new FileStream(FilePath, FileMode.Open))
+            {
+                // выделяем массив для считывания данных из файла
+                Buffer = new byte[FileStream.Length];
+                // считываем данные
+                await FileStream.ReadAsync(Buffer, 0, Buffer.Length);
+            }
+            return Buffer;
+        }
+        
+        private static void CurrentDomain_ProcessExit(object sender, EventArgs e)
+        {
+            OutgoingMessage OMMessage = new();
+            OMMessage.SetType(MessageType.Type.UserDisconnected);
+            OMMessage.SetData("Byby");
+
+            byte[] encryptmess = Clear3DES.Encrypt(OMMessage.GetDataBytes());
+            client.SendDataAsync(encryptmess);
+
+            Task.Delay(1000).Wait();
+        }
     }
 }

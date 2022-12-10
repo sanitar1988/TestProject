@@ -80,9 +80,14 @@
             UserProfile,
 
             /// <summary>
+            /// Пользователь подключился
+            /// </summary>
+            UserConnected,
+
+            /// <summary>
             /// Пользователь отключился
             /// </summary>
-            UserDisconnected,
+            UserDisconnected
         }
     }
 }

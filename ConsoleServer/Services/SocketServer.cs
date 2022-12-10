@@ -1,125 +1,154 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using ConsoleServer.Models;
 
 namespace ConsoleServer.Services
 {
     public class SocketServer
     {
-        private readonly Socket Server;
-        private Dictionary<EndPoint, Socket> OnlineUsers = new Dictionary<EndPoint, Socket>();
+        private readonly Socket _Server;
+        private Socket _FirstSoket;
+        private Connection _FirstConnection;
+
+        public OnlineConnections OnlineConnection;
+
         public SocketServer()
         {
-            Server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            Server.SendBufferSize = 1024 * 1024;
-            Server.ReceiveBufferSize = 1024 * 1024;
+            _Server = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            _Server.SendBufferSize = 1024 * 1024 * 2;
+            _Server.ReceiveBufferSize = 1024 * 1024 * 2;
+            _FirstConnection = new Connection();
+            OnlineConnection = new OnlineConnections();
         }
-        public void StartServerAsync(int serverPort)
+        
+        public void PrepareServer(int serverPort)
         {
             try
             {
                 IPEndPoint IPEndPoint = new IPEndPoint(IPAddress.Any, serverPort);
-                Server.Bind(IPEndPoint);
-                Server.Listen(100);
-                PrintClass.PrintConsole("Server start done!");
+                _Server.Bind(IPEndPoint);
+                _Server.Listen(1);
             }
             catch (Exception ex)
             {
                 PrintClass.PrintConsole(ex.Message);
             }
         }
-        public void AnalyzingData(Socket someClient, byte[] byteMessage)
-        {
-            try
-            {
-                byte[] Decryptmess = Clear3DES.Decrypt(byteMessage);
-                Message IncomingMessage = new Message(MessageType.Type.none);
-                string[] ArrayString = IncomingMessage.ConvertToString(Decryptmess);
 
-                switch (IncomingMessage.MessageType)
+        public void RunSocketServer()
+        {
+            Task.Run(() => ListenAsync());
+            Task.Run(() => ListenDataSocketClientsAsync());
+        }
+
+        private async Task ListenAsync()
+        {
+            while (_Server.IsBound)
+            {
+                _FirstSoket = await _Server.AcceptAsync();
+                _FirstConnection = new Connection
                 {
-                    case MessageType.Type.UserAuthorization:
-
-                        Message Message = new Message(MessageType.Type.UserMessage);
-                        Message.SetData("Hello user! WellCUM in server");
-
-                        byte[] encryptmess = Clear3DES.Encrypt(Message.ConvertToBytes());
-                        SendMessageAsync(someClient, encryptmess);
-                        break;
-
-                    case MessageType.Type.UserDisconnected:
-                        UserDisconnected(someClient);
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                PrintClass.PrintConsole(ex.Message);
+                    Socket = _FirstSoket
+                };
             }
         }
-        private void UserDisconnected(Socket someClient)
-        {
-            PrintClass.PrintConsole("Client " + someClient.RemoteEndPoint + " disconnected!!!");
-            OnlineUsers.Remove(someClient.RemoteEndPoint);
-            PrintClass.PrintConsole("OnlineUsers: " + OnlineUsers.Count);
-        }
-        private void UserConnected(Socket someClient)
-        {
-            PrintClass.PrintConsole("Client " + someClient.RemoteEndPoint + " connected!!!");
-            OnlineUsers.Add(someClient.RemoteEndPoint, someClient);
-            PrintClass.PrintConsole("OnlineUsers: " + OnlineUsers.Count);
-        }
-        public async void SendMessageAsync(Socket someClient, byte[] byteMessage)
-        {
-            try
-            {
-                await someClient.SendAsync(byteMessage, SocketFlags.None);
-                PrintClass.PrintConsole("Send message done!");
-            }
-            catch (Exception ex)
-            {
-                PrintClass.PrintConsole(ex.Message);
-            }
-        }
-        public async void ListenAsync()
-        {
-            PrintClass.PrintConsole("Server listen...");
 
-            while (Server.IsBound)
+        private async Task ListenDataSocketClientsAsync()
+        {
+            while (_Server.IsBound)
             {
                 try
                 {
-                    Socket Client = await Server.AcceptAsync();
-                    UserConnected(Client);
-
-                    await Task.Factory.StartNew(async () =>
+                    if (OnlineConnection.Connections.Count > 0)
                     {
-                        while (Client.Connected)
+                        foreach (Connection Connection in OnlineConnection.Connections.ToList())
                         {
-                            try
+                            if (Connection.Socket != null && Connection.Socket.Available > 0)
                             {
-                                byte[] Buffer = new byte[Server.ReceiveBufferSize];
-                                int Received = await Client.ReceiveAsync(Buffer, SocketFlags.None);
-
-                                byte[] Responce = new byte[Received];
-                                Array.Copy(Buffer, 0, Responce, 0, Received);
-                                AnalyzingData(Client, Responce);
-
-                                //PrintClass.PrintConsole("Client taskID: " + Environment.CurrentManagedThreadId);
-                                //PrintClass.PrintConsole("Task count: " + ThreadPool.ThreadCount);
-                            }
-                            catch (Exception ex)
-                            {
-                                PrintClass.PrintConsole(ex.Message);
+                                await ReceiveDataAsync(Connection);
                             }
                         }
-                    });
+                    }
+                    else
+                    {
+                        if (_FirstConnection.Socket != null && _FirstConnection.Socket.Available > 0)
+                        {
+                            await ReceiveDataAsync(_FirstConnection);
+                        }
+                    }
                 }
-                catch (Exception ex)
+                catch (InvalidOperationException ex)
                 {
                     PrintClass.PrintConsole(ex.Message);
                 }
+                Task.Delay(1).Wait();
+            }
+        }
+        
+        public async void SendDataAsync(Socket someClient, byte[] someData)
+        {
+            try
+            {
+                await someClient.SendAsync(someData, SocketFlags.None);
+            }
+            catch (Exception ex)
+            {
+                PrintClass.PrintConsole(ex.Message);
+            }
+        }
+
+        private async Task ReceiveDataAsync(Connection someConnection)
+        {
+            try
+            {
+                byte[] ReceiveData = new byte[someConnection.Socket.ReceiveBufferSize];
+                int LengthBytes = await someConnection.Socket.ReceiveAsync(ReceiveData, SocketFlags.None);
+
+                if (LengthBytes > 0)
+                {
+                    byte[] ResponceData = new byte[LengthBytes];
+                    Array.Copy(ReceiveData, 0, ResponceData, 0, LengthBytes);
+
+                    byte[] DecryptData = new byte[ResponceData.Length];
+                    DecryptData = Clear3DES.Decrypt(ResponceData);
+
+                    IncomingMessage IncomingMessage = new IncomingMessage(DecryptData);
+
+                    SelectMetods(someConnection, IncomingMessage);
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                PrintClass.PrintConsole(ex.Message);
+            }
+        }
+
+        private void SelectMetods(Connection someConnection, IncomingMessage IncomingMessage)
+        {
+            try
+            {
+                switch (IncomingMessage.IMType)
+                {
+                    case MessageType.Type.UserConnected:
+                        MessageTypeMetods.UserConnected(someConnection.Socket, IncomingMessage.IMDataBytes);
+                        break;
+
+                    case MessageType.Type.UserRegistration:
+                        MessageTypeMetods.UserRegistration(someConnection, IncomingMessage.IMDataBytes);
+                        break;
+
+                    case MessageType.Type.UserMessage:
+                        MessageTypeMetods.UserMessage(someConnection, IncomingMessage.IMDataBytes);
+                        break;
+
+                    case MessageType.Type.UserDisconnected:
+                        MessageTypeMetods.UserDisconnected(someConnection, IncomingMessage.IMDataBytes);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                PrintClass.PrintConsole(ex.Message);
             }
         }
     }
